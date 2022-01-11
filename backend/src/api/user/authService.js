@@ -54,3 +54,59 @@ const validateToken = (req, res, next) => {
         return res.status(200).send({valid: !err})
     })
 }
+
+//Método de Cadastro
+const signup = (req, res, next) => {
+    //Request dos dados passados no formulário
+    const name = req.body.name || ''
+    const email = req.body.email || ''
+    const password = req.body.password || ''
+    const confirmPassword = req.body.confirm_password || ''
+
+    //Validação do e-mail
+    if(!email.match(emailRegex)) {
+        return res.status(400).send({errors: ['O e-mail informado está inválido']})
+    }
+
+    //Validação da senha
+    if(!password.match(passwordRegex)) {
+        return res.status(400).send({
+            errors: [
+                "Senha precisar ter: uma letra maiúscula, uma letra minúscula, um número, uma caractere especial(@#$%) e tamanho entre 6-20."
+            ]
+        })
+    }
+    
+    //Hash da senha, compara a confirmação da senha
+    const salt = bcrypt.genSaltSync()
+    const passwordHash = bcrypt.hashSync(password, salt)
+        if(!bcrypt.compareSync(confirmPassword, passwordHash)) {
+            return res.status(400).send({errors: ['Senhas não conferem.']})
+    }
+
+    //Se o usuário já existe no banco
+    User.findOne({email}, (err, user) => {
+        //se deu erro
+        if(err) {
+            return sendErrorsFromDB(res, err)
+
+        //se encontrou um user válido
+        } else if (user) {
+            return res.status(400).send({errors: ['Usuário já cadastrado.']})
+        
+        //se não, cadastra um novo user
+        } else {
+            const newUser = new User({ name, email, password: passwordHash })
+            //salva usuário
+            newUser.save(err => {
+                if(err) {
+                    return sendErrorsFromDB(res, err)
+                //se não deu erro, loga usuário no sistema
+                } else {
+                    login(req, res, next)
+                }
+            })
+        }
+    })
+}
+module.exports = { login, signup, validateToken }
