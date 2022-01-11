@@ -1,6 +1,6 @@
 const userKey = '_mymoney_user' //chave que será armazenada no localStorage
 const INITIAL_STATE = {
-    user: JSON.parse(localStorage.getItem(userKey)),
+    user: {name: 'teste', email: 'anabia@gmail.com'}, //JSON.parse(localStorage.getItem(userKey)),
     validToken: false
 }
 export default (state = INITIAL_STATE, action) => {
