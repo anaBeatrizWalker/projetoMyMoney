@@ -31,7 +31,7 @@ const login = (req, res, next) => {
         //Se user válido, compara a senha enviada com a senha criptografada do banco
         } else if (user && bcrypt.compareSync(password, user.password)) {
             //Gera um token a partir do user e do secret
-            const token = jwt.sign(user, env.authSecret, {
+            const token = jwt.sign({ ...user }, env.authSecret, {
                 expiresIn: "1 day" //expiração do token de um dia (usuário pode ficar logado por 1 dia)
             })
             //Gera um json com as infos do usuário
